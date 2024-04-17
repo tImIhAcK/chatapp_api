@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  web:
+    restart: always
+    build: ./app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app/:/usr/src/app/
+    ports:
+      - 8123:8000
+    env_file:
+      - ./.env.dev
+    links:
+      - redis
+    depends_on:
+      - db
+  
+  redis:
+    restart: unless-stopped
+    image: redis:latest
+    expose:
+      - 6379
+
+  db:
+    image: postgres:15
+    volumes:
+      - chatApp_postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=ChatAPP
+      
+
+volumes:
+  chatApp_postgres_data:

@@ -1,0 +1,42 @@
+{% load i18n %}
+
+{% block subject %}
+{% blocktrans %}Account activation on {{ site_name }}{% endblocktrans %}
+{% endblock subject %}
+
+{% block text_body %}
+{% blocktrans %}Hello {{user.first_name}}, {% endblocktrans %}
+{% blocktrans %} You're receiving this email because you need to finish activation process on {{ site_name }} and start earning with your skills immediately.{% endblocktrans %}
+
+{% trans "Please kindly click the link below to activate your personal account and be linked to those who need your services:" %}
+{{ protocol }}://{{ domain }}/{{ url|safe }}
+
+{% trans "Thank you for choosing Ecommerce. We are your reliable partner in your journey to success." %}
+
+
+
+{% blocktrans %}The {{ site_name }} team{% endblocktrans %}
+
+{% blocktrans %}No. 1 reliable Ecommerce site{% endblocktrans %}
+{% endblock text_body %}
+
+{% block html_body %}
+<p>
+    {% blocktrans %}Hello {{user.first_name}}, {% endblocktrans %}
+</p>
+<p>{% blocktrans %} You're receiving this email because you need to finish activation process on {{ site_name }} and start making orders immediately.{% endblocktrans %}
+</p>
+
+<p>{% trans "Please kindly click the link below to activate your personal account and be linked to those who need your services:" %}</p>
+<p><a href="{{ protocol }}://{{ domain }}/{{ url|safe }}">{{ protocol }}://{{ domain }}/{{ url|safe }}</a></p>
+
+
+<p>{% trans "Thank you for choosing Ecommerce. We are your reliable partner to get whatever you need" %}
+</p>
+
+<p>{% blocktrans %}The {{ site_name }} team{% endblocktrans %}</p>
+<p>{% blocktrans %}No. 1 reliable Ecommerce site{% endblocktrans %}</p>
+
+{% endblock html_body %}
+
+
