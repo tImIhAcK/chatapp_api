@@ -53,30 +53,30 @@ class ChatConsumer(JsonWebsocketConsumer):
         
         
 
-        # messages = self.conversation.messages.all().order_by("-timestamp")[:50]
-        # message_count = self.conversation.messages.all().count()
-        # self.send_json(
-        #     {
-        #         "type": "last_50_messages",
-        #         "message": MessageSerializer(messages, many=True).data,
-        #         "has_more": message_count > 50,
-        #     }
-        # )
+        messages = self.conversation.messages.all().order_by("-timestamp")[:50]
+        message_count = self.conversation.messages.all().count()
+        self.send_json(
+            {
+                "type": "last_50_messages",
+                "message": MessageSerializer(messages, many=True).data,
+                "has_more": message_count > 50,
+            }
+        )
 
-        # self.send_json(
-        #     {
-        #         "type": "online_user_list",
-        #         "users": [user.username for user in self.conversation.online.all()]
-        #     }
-        # )
+        self.send_json(
+            {
+                "type": "online_user_list",
+                "users": [user.username for user in self.conversation.online.all()]
+            }
+        )
 
-        # async_to_sync(self.channel_layer.group_send)(
-        #     self.conversation_name,
-        #     {
-        #         "type": "user_join",
-        #         "user": self.user.username
-        #     }
-        # )
+        async_to_sync(self.channel_layer.group_send)(
+            self.conversation_name,
+            {
+                "type": "user_join",
+                "user": self.user.username
+            }
+        )
 
     def disconnect(self, code):
         if self.user is not None and self.user.is_authenticated:
@@ -88,10 +88,10 @@ class ChatConsumer(JsonWebsocketConsumer):
                 }
             )
 
-            async_to_sync(self.channel_layer.group_discard)(
-                self.conversation_name,
-                self.channel_name
-            )
+            # async_to_sync(self.channel_layer.group_discard)(
+            #     self.conversation_name,
+            #     self.channel_name
+            # )
 
             self.conversation.leave(self.user)
         return super().disconnect(code)
@@ -104,8 +104,6 @@ class ChatConsumer(JsonWebsocketConsumer):
 
     def receive_json(self, content, **kwargs):
         message_type = content["type"]
-        if message_type == "greeting":
-            print(content['message'])
 
         if message_type == "chat_message":
             message = Message.objects.create(
@@ -116,14 +114,14 @@ class ChatConsumer(JsonWebsocketConsumer):
             )
 
             async_to_sync(self.channel_layer.group_send)(
+                self.conversation_name,
                 {
                     "type": "chat_message_echo",
-                    "name": content["name"],
                     "name": self.user.username,
                     "message": MessageSerializer(message).data
                 }
             )
-
+            
             notification_group_name = self.get_reciever().username + "__notifications"
             async_to_sync(self.channel_layer.group_send)(
                 notification_group_name,
@@ -171,6 +169,9 @@ class ChatConsumer(JsonWebsocketConsumer):
         self.send_json(event)
 
     def unread_count(self, event):
+        self.send_json(event)
+        
+    def user_join(self, event):
         self.send_json(event)
 
     def user_leave(self, event):
